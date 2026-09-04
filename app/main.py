@@ -11,7 +11,7 @@ app = FastAPI(title="Helpy ServiceNow Agent")
 def health():
     return {"status": "it's workingg!!"} # to check everything is fine
 
-# wevhook endpoint post for service now 
+# wehook endpoint post for service now 
 @app.post("/webhook", status_code=status.HTTP_202_ACCEPTED)
 def webhook(payload: IncidentPayload):
     logger.info("Received %s (sys_id=%s)", payload.number, payload.incident_sys_id)
