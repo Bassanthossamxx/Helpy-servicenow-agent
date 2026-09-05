@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# so "app" can be imported when this file is run directly from the project root
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import json
 from pathlib import Path
 

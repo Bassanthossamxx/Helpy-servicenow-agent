@@ -193,11 +193,20 @@ INFO:app.main:INC0010007 -> respond
 
 Screenshots of each ticket after triage are in [docs/incidents](docs/incidents), and the Business Rule setup is in [docs/business-rule](docs/business-rule).
 
-You can also check the LLM on its own, without ServiceNow:
+## Testing the LLM on its own
+
+The `tests` folder is there for testing and debugging. `test_llm.py` checks the
+decision step alone, without ServiceNow and without the webhook, so you can see
+if the prompt is doing its job before blaming anything else. Run it from the
+project root:
 
 ```bash
 python tests/test_llm.py
 ```
+
+It sends the three tickets from `assets/test_incidents.json` to Gemini and
+prints `PASS` or `FAIL` for each one against the decision it should give, with
+the message it answered. This one really calls the API, so it uses your quota.
 
 ---
 
@@ -208,7 +217,7 @@ python tests/test_llm.py
 ```
 app/          all the service code
 assets/       the data given with the task
-tests/        one test per step, to debug each piece on its own
+tests/        checks a single piece on its own, to debug without the whole loop
 docs/         screenshots, and any document needed later
 prompt.txt    the prompt, exactly as the service sends it
 requirements.txt
@@ -220,7 +229,7 @@ Everything is split by what it is, so each piece can be opened and fixed on its 
 
 - **app/** is the only place with code that runs the service.
 - **assets/** is the data that came with the task.
-- **tests/** is there to debug each step separately. When the loop breaks you need to know if it was ServiceNow, the LLM, or the service.
+- **tests/** is there to debug a step on its own. When the loop breaks you need to know if it was ServiceNow, the LLM, or the service, and testing the decision step alone is the quickest way to rule the LLM in or out.
 - **docs/** holds the screenshots and anything documented later.
 - **prompt.txt** is kept outside the code because the prompt is dynamic. The knowledge base and the ticket are formatted into it at runtime, and it can be changed and tested without touching Python.
 - **.env.example** lists the variable names with empty values, so anyone cloning the repo knows exactly what to fill in.
