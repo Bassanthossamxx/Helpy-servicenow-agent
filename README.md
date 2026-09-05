@@ -9,13 +9,13 @@ ticket is created it reads it, looks at the knowledge base, and decides what to 
 and close it, ask the user for the one detail that is missing, or leave it for a human when
 nothing in the knowledge base covers it.
 
-I named it **Helpy** because that is what it does, it helps the person who opened the ticket without needing a human, and it does it in about 1 minutes instead of hours
+I named it **Helpy** because that is what it does, it helps the person who opened the ticket without needing a human, and it does it in about 1 minute instead of hours.
 
-Nothing in the loop is manual, Someone submits a ticket, and the answer is already on it when they look again
+Nothing in the loop is manual. Someone submits a ticket, and the answer is already on it when they look again.
 
 ## The three decisions
 
-Helpy answers only from the knowledge base in `assets/kb_articles.json`, never from general knowledge, Every ticket ends as one of these:
+Helpy answers only from the knowledge base in `assets/kb_articles.json`, never from general knowledge. Every ticket ends as one of these:
 
 | Decision | When | What lands on the ticket |
 |----------|------|--------------------------|
@@ -91,7 +91,7 @@ cp .env.example .env
 
 | Variable | Where to get it |
 |----------|-----------------|
-| `SERVICENOW_INSTANCE_URL` | your instance URL, like `https:/devXXXXXX.service-now.com` |
+| `SERVICENOW_INSTANCE_URL` | your instance URL, like `https://devXXXXXX.service-now.com` |
 | `SERVICENOW_USERNAME` | always `admin` on a PDI |
 | `SERVICENOW_PASSWORD` | developer portal, your instance card, three dot menu, **Manage instance password** |
 | `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com) |
@@ -137,8 +137,7 @@ ngrok http 8000
 
 Copy the `https://xxxx.ngrok-free.app` line, that is your public URL.
 
-Both have to be the same port, the service and ngrok. Port 8010 is not special, any free port works. 
-f ngrok complains or the tunnel does not answer, changing the port on both sides is the first thing to try like If 8000 was not working so will try other port like 8010
+Both have to be the same port, the service and ngrok. Port 8010 is not special, any free port works , if ngrok complains or the tunnel does not answer, changing the port on both sides is the first thing to try like If 8000 was not working so will try other port like 8010
 
 ngrok gives a new URL every time it restarts, so the Business Rule `business_rule.js` in the next step has to be updated each time
 
@@ -318,8 +317,7 @@ In the PDI open System Logs > System Log > All and search for `Task0`, the scrip
 **429 from Gemini.** The free quota is per project and per model, so a new key in the same
 project does not help. Use a different model or wait for the daily reset.
 
-**The instance returns a login page.** The PDI is asleep, wake it up from the developer
-portal.
+**The instance returns a login page.** The PDI is asleep, wake it up from the developer portal.
 
 ---
 
