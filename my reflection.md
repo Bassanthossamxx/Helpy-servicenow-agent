@@ -44,6 +44,17 @@ and make the agent write on a ticket. It needs a shared secret that the service
 checks on every request, and a dedicated integration user with only the roles it
 needs, not `admin`.
 
+**Answering the follow up on an `ask`.** This is the gap that bothers me most.
+When the agent chooses `ask` it writes one question in `comments` and stops
+there. If the user comes back and answers it, nothing happens, the Business Rule
+only fires on insert, the webhook drops a second call for the same `sys_id` as a
+duplicate, and the payload does not carry the comments at all, so Gemini would
+never see the answer anyway. To close that loop the rule has to run on update
+too, with a condition on the comments changing and on the author not being the
+integration user so the agent does not reply to itself, the payload has to carry
+the conversation so far, and the prompt has to read it before deciding, so a
+question that was answered can turn into `respond` instead of asking again.
+
 **A full UI.** A page to submit tickets and follow them, with two roles, a user
 who sees only their own tickets and the answers, and an agent who sees the work
 notes and everything escalated. Then nobody needs the ServiceNow interface.
