@@ -35,6 +35,8 @@ def triage(payload: IncidentPayload) -> None:
         update_incident(payload.incident_sys_id, result)
 
     except Exception:
+        # nothing was written on the ticket, so let servicenow send it again
+        processed.discard(payload.incident_sys_id)
         # never let a background failure kill the service
         logger.exception("Triage failed for %s", payload.number)
 
