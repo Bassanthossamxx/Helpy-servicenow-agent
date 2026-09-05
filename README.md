@@ -39,7 +39,7 @@ If Gemini fails or answers something unusable, the decision falls back to `escal
 ## 2. Clone and install
 
 ```bash
-git clone https://github.com/<your-user>/Helpy-servicenow-agent.git
+git clone https://github.com/Bassanthossamxx/Helpy-servicenow-agent.git
 cd Helpy-servicenow-agent
 
 python -m venv .venv
@@ -137,7 +137,7 @@ ngrok http 8000
 
 Copy the `https://xxxx.ngrok-free.app` line, that is your public URL.
 
-Both have to be the same port, the service and ngrok. Port 8010 is not special, any free port works , if ngrok complains or the tunnel does not answer, changing the port on both sides is the first thing to try like If 8000 was not working so will try other port like 8010
+The service and ngrok have to be on the same port. No port is special, any free one works, so if ngrok complains or the tunnel does not answer, changing the port on both sides is the first thing to try. I moved to 8010 because Docker had already taken 8000 on my machine.
 
 ngrok gives a new URL every time it restarts, so the Business Rule `business_rule.js` in the next step has to be updated each time
 
