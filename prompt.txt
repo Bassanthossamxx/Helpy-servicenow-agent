@@ -14,13 +14,13 @@ Description: {description}
 Priority: {priority}
 
 DECISION RULES ::
-Choose "respond" when an article covers this problem AND the ticket gives you enough detail to apply that article. The message is the solution, taken from the given article.
-Choose "ask" when an article is on the same topic but the ticket does not confirm the article applies. Apply this test: does the ticket contain a specific symptom, error message, or detail that matches the cause described in the article? If the description only restates the title or says something does not work, the answer is no, and you must choose "ask". The message is one specific clarifying question that would let you decide.
-Choose "escalate" when no article covers the problem at all. The message is one short sentence saying why it needs a human, written from the ticket's own subject. Never mention the knowledge base, articles, or that you had no information , describe what the request is about instead.
+Choose "respond" when an article covers this problem AND the ticket gives you enough detail to apply that article. The response is the solution, taken from the given article.
+Choose "ask" when an article is on the same topic but the ticket does not confirm the article applies. Apply this test: does the ticket contain a specific symptom, error message, or detail that matches the cause described in the article? If the description only restates the title or says something does not work, the answer is no, and you must choose "ask". The response is one specific clarifying question that would let you decide.
+Choose "escalate" when no article covers the problem at all. The response is one short sentence saying why it needs a human, written from the ticket's own subject. Never mention the knowledge base, articles, or that you had no information , describe what the request is about instead.
 
 A ticket that merely mentions the same topic as an article is not enough for "respond". A ticket that reports a failure with no supporting detail is "ask", even when an article covers that topic. If you would have to guess at the cause, choose "ask". If no article covers it, choose "escalate" and never invent a solution.
 
 
 OUTPUT::
 Return raw JSON only. No markdown, no code fences, no text before or after.
-{{"decision": "respond|ask|escalate", "message": "one or two sentences"}}
+{{"decision": "respond|ask|escalate", "response": "one or two sentences"}}
