@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -8,3 +10,8 @@ class IncidentPayload(BaseModel):
     description: str | None="" # can be empty 
     priority: int = Field(ge=1, le=5) # from json 1 to 5
     
+
+# Decision Model
+class Decision(BaseModel):
+    decision: Literal["ask", "respond", "escalate"]
+    response: str

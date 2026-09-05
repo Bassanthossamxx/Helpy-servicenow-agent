@@ -1,9 +1,15 @@
 import json
 import logging
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from app.config import GEMINI_API_KEY
+
+from app.models import Decision
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 logging.getLogger("google_genai.models").setLevel(logging.ERROR)
@@ -11,28 +17,17 @@ logging.getLogger("google_genai.models").setLevel(logging.ERROR)
 ROOT = Path(__file__).resolve().parent.parent
 
 # prompt file path and save it in var PROMPT
-prompt_path = ROOT / "prompt.txt"
-PROMPT = prompt_path.read_text(encoding="utf-8")
+PROMPT = (ROOT / "prompt.txt").read_text(encoding="utf-8")
 
-kb_path = ROOT / "assets" / "kb_articles.json"
-with open(kb_path, encoding="utf-8") as f:
-    kb_data = json.load(f)
-
-ARTICLES = kb_data["articles"]
-# get each line then add them to our dynamic var KB_TEXT
-lines = []
-for article in ARTICLES:
-    lines.append(f"{article['id']}. {article['text']}")
-KB_TEXT = "\n".join(lines)
-
-# allowed decision values
-ALLOWED = {"respond", "ask", "escalate"}
+# knowledge base, one article per line
+ARTICLES = json.loads((ROOT / "assets" / "kb_articles.json").read_text(encoding="utf-8"))["articles"]
+KB_TEXT = "\n".join(f"{a['id']}. {a['text']}" for a in ARTICLES)
 
 # start call gemini, timeout in ms so a hung request cannot block us forever
-client = genai.Client(api_key=GEMINI_API_KEY, http_options={"timeout": 30000})
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"), http_options={"timeout": 30000})
 
 
-def decide(short_description: str, description: str | None, priority: int) -> dict:
+def decide(short_description: str, description: str | None, priority: int) -> Decision:
     prompt = PROMPT.format(
         kb_articles=KB_TEXT,
         short_description=short_description,
@@ -46,24 +41,18 @@ def decide(short_description: str, description: str | None, priority: int) -> di
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0, # this temp to choose highest prop so better for classification
-                response_mime_type="application/json", # force json mode
+                response_mime_type="application/json",
+                response_schema=Decision, # gemini validates the shape for us, so no manual parsing
             ),
         )
 
-        text = response.text.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        data = json.loads(text)
-
-        decision = data.get("decision")
-
-        # error handling for wrong classification
-        if decision not in ALLOWED:
-            logger.error("Unexpected decision from Gemini: %r", decision)
-            return {"decision": "escalate", "message": "Could not decide automatically, needs a human."}
-
-        # final output to use in service now
-        return {"decision": decision, "message": str(data.get("message", ""))[:1000]}
+        # parsed is a Decision, or None if gemini returned something unusable
+        return response.parsed or Decision(
+            decision="escalate",
+            response="Could not decide automatically, needs a human.",
+        )
 
     # error handling for any fall-back in gemini
     except Exception as exc:
         logger.error("Gemini call failed: %s", exc)
-        return {"decision": "escalate", "message": "Automatic triage failed, needs a human."}
+        return Decision(decision="escalate", response="Automatic triage failed, needs a human.")

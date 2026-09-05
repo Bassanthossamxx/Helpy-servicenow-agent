@@ -1,44 +1,64 @@
-import logging
+import os
+
 import requests
-from app.config import SERVICENOW_INSTANCE_URL, SERVICENOW_USERNAME, SERVICENOW_PASSWORD
+from dotenv import load_dotenv
 
-logger = logging.getLogger(__name__)
+# Load environment variables
+load_dotenv()
 
-AUTH = (SERVICENOW_USERNAME, SERVICENOW_PASSWORD) # our secret envs
-HEADERS = {"Accept": "application/json", "Content-Type": "application/json"}
+# ServiceNow configuration
+SERVICENOW_URL = os.getenv("SERVICENOW_INSTANCE_URL", "").rstrip("/")
+S_USERNAME = os.getenv("SERVICENOW_USERNAME")
+S_PASSWORD = os.getenv("SERVICENOW_PASSWORD")
 
 
-# build the body for each decision, fields come from pdi_guide.md
-def build_body(decision: str, message: str) -> dict:
+def update_incident(sys_id, result):
 
-    if decision == "respond":
-        return {
-            "work_notes": message,
-            "close_notes": message,
-            "close_code": "Solved (Permanently)",
-            "state": "6",  # resolved
+    # Check the decision
+    if result.decision == "respond":
+
+        data = {
+            "work_notes": result.response,
+            "state": "6",
+            "close_notes": result.response,
+            "close_code": "Solved (Permanently)"
         }
-    if decision == "ask":
-        return {"comments": message}  # comments are customer visible
 
-    return {"work_notes": message}  # escalate, internal note "work_notes" only
+    elif result.decision == "ask":
 
+        # comments are customer-visible, work_notes are internal
+        data = {
+            "comments": result.response
+        }
 
-def write_back(incident_sys_id: str, decision: str, message: str) -> bool:
-    url = f"{SERVICENOW_INSTANCE_URL}/api/now/table/incident/{incident_sys_id}" # service-now endpoint
-    body = build_body(decision, message)
+    elif result.decision == "escalate":
 
-    try:
-        response = requests.patch(url, json=body, auth=AUTH, headers=HEADERS, timeout=30) #call endpoint
+        data = {
+            "work_notes": result.response
+        }
 
-    except Exception as exc:
-        logger.error("ServiceNow request failed: %s", exc)
-        return False
+    else:
+        raise ValueError(
+            f"Invalid decision: {result.decision}"
+        )
 
-    # check status of service now for error handling
-    if response.status_code != 200:
-        logger.error("ServiceNow returned %s: %s", response.status_code, response.text[:300])
-        return False
-    # final result
-    logger.info("Updated %s with decision %s", incident_sys_id, decision)
-    return True
+    # ServiceNow incident endpoint
+    url = (
+        f"{SERVICENOW_URL}"
+        f"/api/now/table/incident/{sys_id}"
+    )
+
+    response = requests.patch(
+        url,
+        auth=(S_USERNAME, S_PASSWORD),
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        json=data,
+        timeout=30
+    )
+
+    response.raise_for_status()
+
+    return response.json()

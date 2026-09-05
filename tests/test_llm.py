@@ -15,9 +15,9 @@ for case in data["incidents"]:
     )
     # save responses
     expected = case["expected_decision"]
-    actual = result["decision"]
+    actual = result.decision
     # print testing result 
     mark = "PASS" if actual == expected else "FAIL"
     print(f"{mark} | expected={expected} | got={actual}")
     print(f"       {case['short_description']}")
-    print(f"       message: {result['message']}\n")
+    print(f"       message: {result.response}\n")
